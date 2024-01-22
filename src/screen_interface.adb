@@ -29,8 +29,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with STM32.Board;     use STM32.Board;
-with HAL.Touch_Panel;
+--  with STM32.Board;     use STM32.Board;
 
 package body Screen_Interface is
 
@@ -38,10 +37,9 @@ package body Screen_Interface is
    -- Current_Touch_State --
    -------------------------
 
-   function Current_Touch_State return Touch_State is
+   function Current_Touch_State (TP : Any_Touch_Panel) return Touch_State is
       TS    : Touch_State;
-      ST_TS : constant HAL.Touch_Panel.TP_State :=
-                Touch_Panel.Get_All_Touch_Points;
+      ST_TS : constant HAL.Touch_Panel.TP_State := TP.Get_All_Touch_Points;
    begin
       TS.Touch_Detected := ST_TS'Length > 0;
 
