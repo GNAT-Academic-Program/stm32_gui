@@ -39,6 +39,6 @@ package Screen_Interface is
       Y : Natural;
    end record;
 
-   function Current_Touch_State (TP : Any_Touch_Panel) return Touch_State;
+   function Current_Touch_State (TP : in out Touch_Panel_Device'Class) return Touch_State;
 
 end Screen_Interface;
