@@ -14,4 +14,4 @@ stm32_hal = "0.1.0"
 adl_middleware = "0.2.0"
 
 [configuration.values]
-#cortex_m.core = "m4f"
+cortex_m.core = "m4f"
