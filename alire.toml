@@ -1,13 +1,16 @@
 name = "stm32_gui"
-description = "Shiny new project"
-version = "0.1.0-dev"
+description = "stm32 Graphical User Interface (GUI) utilities"
+version = "0.1.0"
+licenses = "BSD-3-Clause"
 
-authors = ["Olivier Henley"]
+authors = ["AdaCore"]
 maintainers = ["Olivier Henley <olivier.henley@gmail.com>"]
 maintainers-logins = ["ohenley"]
+website="https://github.com/GNAT-Academic-Program/stm32_gui"
+tags = ["embedded", "stm32", "gui"]
 
 [[depends-on]]
-stm32_hal = "0.1.0-dev"
+stm32_hal = "0.1.0"
 adl_middleware = "0.2.0"
 
 [configuration.values]
