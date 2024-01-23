@@ -35,7 +35,7 @@
 with BMP_Fonts;     use BMP_Fonts;
 
 with HAL.Bitmap;
-with HAL.Framebuffer; use HAL.Framebuffer;
+with HAL.Framebuffer;
 
 package LCD_Std_Out is
 
@@ -63,17 +63,15 @@ package LCD_Std_Out is
    Current_Text_Color       : HAL.Bitmap.Bitmap_Color := Default_Text_Color;
    Current_Background_Color : HAL.Bitmap.Bitmap_Color := Default_Background_Color;
 
-   procedure Set_Font (Display : in out Frame_Buffer_Display'Class;
-                       To : BMP_Font);
+   procedure Set_Font (To : BMP_Font);
    --  Changes the current font setting so that subsequent output is in the
    --  specified font.
 
-   procedure Set_Orientation (Display : in out Frame_Buffer_Display'Class;
-                              To : HAL.Framebuffer.Display_Orientation);
+   procedure Set_Orientation (To : HAL.Framebuffer.Display_Orientation);
    --  Configures the screen orientation and fills the screen with the current
    --  background color. All previously displayed content is lost.
 
-   procedure Clear_Screen (Display : in out Frame_Buffer_Display'Class);
+   procedure Clear_Screen;
 
    ----------------------------------------------------------------------------
 
@@ -81,17 +79,14 @@ package LCD_Std_Out is
    --  wrap around to the next "line" when necessary, as determined by the
    --  current orientation of the screen.
 
-   procedure Put_Line (Display : in out Frame_Buffer_Display'Class;
-                       Msg : String);
+   procedure Put_Line (Msg : String);
    --  Note: wraps around to the next line if necessary.
    --  Always calls procedure New_Line automatically after printing the string.
 
-   procedure Put (Display : in out Frame_Buffer_Display'Class;
-                  Msg : String);
+   procedure Put (Msg : String);
    --  Note: wraps around to the next line if necessary.
 
-   procedure Put (Display : in out Frame_Buffer_Display'Class;
-                  Msg : Character);
+   procedure Put (Msg : Character);
 
    procedure New_Line;
    --  A subsequent call to Put or Put_Line will start printing characters at
@@ -108,14 +103,12 @@ package LCD_Std_Out is
    --  will use one set or the other. If you only need X/Y coordinate control,
    --  consider directly using an instance of HAL.Bitmap.
 
-   procedure Put (Display : in out Frame_Buffer_Display'Class;
-                  X, Y : Natural; Msg : Character);
+   procedure Put (X, Y : Natural; Msg : Character);
    --  Prints the character at the specified location. Has no other effect
    --  whatsoever, especially none on the state of the current logical line
    --  or logical column.
 
-   procedure Put (Display : in out Frame_Buffer_Display'Class;
-                  X, Y : Natural; Msg : String);
+   procedure Put (X, Y : Natural; Msg : String);
    --  Prints the string, starting at the specified location. Has no other
    --  effect whatsoever, especially none on the state of the current logical
    --  line or logical column. Does not wrap around.

@@ -29,8 +29,6 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with HAL.Touch_Panel; use HAL.Touch_Panel;
-
 package Screen_Interface is
 
    type Touch_State is record
@@ -39,6 +37,6 @@ package Screen_Interface is
       Y : Natural;
    end record;
 
-   function Current_Touch_State (TP : in out Touch_Panel_Device'Class) return Touch_State;
+   function Current_Touch_State return Touch_State;
 
 end Screen_Interface;

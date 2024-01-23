@@ -29,7 +29,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
---  with STM32.Board; use STM32.Board;
+with STM32.Board; use STM32.Board;
 with Bitmapped_Drawing;
 with Bitmap_Color_Conversion; use Bitmap_Color_Conversion;
 
@@ -44,13 +44,11 @@ package body LCD_Std_Out is
    Char_Width  : Natural := BMP_Fonts.Char_Width (Current_Font);
    Char_Height : Natural := BMP_Fonts.Char_Height (Current_Font);
 
-   Max_Width   : Natural := 0;
-   --  Max_Width   : Natural := LCD_Natural_Width - Char_Width;
+   Max_Width   : Natural := LCD_Natural_Width - Char_Width;
    --  The last place on the current "line" on the LCD where a char of the
    --  current font size can be printed
 
-   Max_Height : Natural := 0;
-   --  Max_Height : Natural := LCD_Natural_Height - Char_Height;
+   Max_Height : Natural := LCD_Natural_Height - Char_Height;
    --  The last "line" on the LCD where a char of this current font size can be
    --  printed
 
@@ -63,32 +61,28 @@ package body LCD_Std_Out is
 
    Initialized : Boolean := False;
 
-   procedure Draw_Char (Display : in out Frame_Buffer_Display'Class;
-                        X, Y : Natural; Msg : Character);
+   procedure Draw_Char (X, Y : Natural; Msg : Character);
    --  Convenience routine for call Drawing.Draw_Char
 
-   procedure Recompute_Screen_Dimensions (Display : in out Frame_Buffer_Display'Class;
-                                          Font : BMP_Font);
+   procedure Recompute_Screen_Dimensions (Font : BMP_Font);
    --  Determins the max height and width for the specified font, given the
    --  current LCD orientation
 
-   procedure Check_Initialized (Display : in out Frame_Buffer_Display'Class) with Inline;
+   procedure Check_Initialized with Inline;
    --  Ensures that the LCD display is initialized and DMA2D
    --  is up and running
 
-   procedure Internal_Put (Display : in out Frame_Buffer_Display'Class;
-                           Msg : String);
+   procedure Internal_Put (Msg : String);
    --  Puts a new String in the frame buffer
 
-   procedure Internal_Put (Display : in out Frame_Buffer_Display'Class;
-                           Msg : Character);
+   procedure Internal_Put (Msg : Character);
    --  Puts a new character in the frame buffer.
 
    -----------------------
    -- Check_Initialized --
    -----------------------
 
-   procedure Check_Initialized (Display : in out Frame_Buffer_Display'Class) is
+   procedure Check_Initialized is
    begin
       if Initialized then
          return;
@@ -102,9 +96,9 @@ package body LCD_Std_Out is
          --  protected objects calling an entry not meant for that
          Display.Set_Mode (HAL.Framebuffer.Polling);
       else
-         --  Display.Initialize (Mode => HAL.Framebuffer.Polling);
+         Display.Initialize (Mode => HAL.Framebuffer.Polling);
          Display.Initialize_Layer (1, HAL.Bitmap.RGB_565);
-         Clear_Screen (Display);
+         Clear_Screen;
       end if;
    end Check_Initialized;
 
@@ -112,10 +106,9 @@ package body LCD_Std_Out is
    -- Recompute_Screen_Dimensions --
    ---------------------------------
 
-   procedure Recompute_Screen_Dimensions (Display : in out Frame_Buffer_Display'Class;
-                                          Font : BMP_Font) is
+   procedure Recompute_Screen_Dimensions (Font : BMP_Font) is
    begin
-      Check_Initialized (Display);
+      Check_Initialized;
       Char_Width  := BMP_Fonts.Char_Width (Font);
       Char_Height := BMP_Fonts.Char_Height (Font);
       Max_Width   := Display.Width - Char_Width - 1;
@@ -126,32 +119,30 @@ package body LCD_Std_Out is
    -- Set_Font --
    --------------
 
-   procedure Set_Font (Display : in out Frame_Buffer_Display'Class;
-                       To : BMP_Font) is
+   procedure Set_Font (To : in BMP_Font) is
    begin
       Current_Font := To;
-      Recompute_Screen_Dimensions (Display, Current_Font);
+      Recompute_Screen_Dimensions (Current_Font);
    end Set_Font;
 
    ---------------------
    -- Set_Orientation --
    ---------------------
 
-   procedure Set_Orientation (Display : in out Frame_Buffer_Display'Class;
-                              To : Display_Orientation) is
+   procedure Set_Orientation (To : in HAL.Framebuffer.Display_Orientation) is
    begin
       Display.Set_Orientation (To);
-      Recompute_Screen_Dimensions (Display, Current_Font);
-      Clear_Screen (Display);
+      Recompute_Screen_Dimensions (Current_Font);
+      Clear_Screen;
    end Set_Orientation;
 
    ------------------
    -- Clear_Screen --
    ------------------
 
-   procedure Clear_Screen (Display : in out Frame_Buffer_Display'Class) is
+   procedure Clear_Screen is
    begin
-      Check_Initialized (Display);
+      Check_Initialized;
       Display.Hidden_Buffer (1).Set_Source (Current_Background_Color);
       Display.Hidden_Buffer (1).Fill;
       Current_Y := 0;
@@ -163,14 +154,13 @@ package body LCD_Std_Out is
    -- Internal_Put --
    ------------------
 
-   procedure Internal_Put (Display : in out Frame_Buffer_Display'Class;
-                           Msg : String) is
+   procedure Internal_Put (Msg : String) is
    begin
       for C of Msg loop
          if C = ASCII.LF then
             New_Line;
          else
-            Internal_Put (Display, C);
+            Internal_Put (C);
          end if;
       end loop;
    end Internal_Put;
@@ -179,10 +169,9 @@ package body LCD_Std_Out is
    -- Put --
    ---------
 
-   procedure Put (Display : in out Frame_Buffer_Display'Class;
-                  Msg : String) is
+   procedure Put (Msg : String) is
    begin
-      Internal_Put (Display, Msg);
+      Internal_Put (Msg);
       Display.Update_Layer (1, True);
    end Put;
 
@@ -190,10 +179,9 @@ package body LCD_Std_Out is
    -- Draw_Char --
    ---------------
 
-   procedure Draw_Char (Display : in out Frame_Buffer_Display'Class;
-                        X, Y : Natural; Msg : Character) is
+   procedure Draw_Char (X, Y : Natural; Msg : Character) is
    begin
-      Check_Initialized (Display);
+      Check_Initialized;
       Bitmapped_Drawing.Draw_Char
         (Display.Hidden_Buffer (1).all,
          Start      => (X, Y),
@@ -211,24 +199,13 @@ package body LCD_Std_Out is
    -- Put --
    ---------
 
-   procedure Internal_Put (Display : in out Frame_Buffer_Display'Class;
-                           Msg : Character) is
-      X : Natural;
+   procedure Internal_Put (Msg : Character) is
    begin
       if Char_Count * Char_Width > Max_Width then
-         --  go to the next line down
-         Current_Y := Current_Y + Char_Height;
-         if Current_Y > Max_Height then
-            Current_Y := 0;
-         end if;
-         --  and start at beginning of the line
-         X := 0;
-         Char_Count := 0;
-      else
-         X := Char_Count * Char_Width;
+         New_Line;
       end if;
 
-      Draw_Char (Display, X, Current_Y, Msg);
+      Draw_Char (Char_Count * Char_Width, Current_Y, Msg);
       Char_Count := Char_Count + 1;
    end Internal_Put;
 
@@ -236,10 +213,9 @@ package body LCD_Std_Out is
    -- Put --
    ---------
 
-   procedure Put (Display : in out Frame_Buffer_Display'Class;
-                  Msg : Character) is
+   procedure Put (Msg : Character) is
    begin
-      Internal_Put (Display, Msg);
+      Internal_Put (Msg);
       Display.Update_Layer (1, True);
    end Put;
 
@@ -261,10 +237,9 @@ package body LCD_Std_Out is
    -- Put_Line --
    --------------
 
-   procedure Put_Line (Display : in out Frame_Buffer_Display'Class;
-                       Msg : String) is
+   procedure Put_Line (Msg : String) is
    begin
-      Put (Display, Msg);
+      Put (Msg);
       New_Line;
    end Put_Line;
 
@@ -272,10 +247,9 @@ package body LCD_Std_Out is
    -- Put --
    ---------
 
-   procedure Put (Display : in out Frame_Buffer_Display'Class;
-                  X, Y : Natural; Msg : Character) is
+   procedure Put (X, Y : Natural; Msg : Character) is
    begin
-      Draw_Char (Display, X, Y, Msg);
+      Draw_Char (X, Y, Msg);
       Display.Update_Layer (1, True);
    end Put;
 
@@ -283,14 +257,13 @@ package body LCD_Std_Out is
    -- Put --
    ---------
 
-   procedure Put (Display : in out Frame_Buffer_Display'Class;
-                  X, Y : Natural; Msg : String) is
+   procedure Put (X, Y : Natural; Msg : String) is
       Count  : Natural := 0;
       Next_X : Natural;
    begin
       for C of Msg loop
          Next_X := X + Count * Char_Width;
-         Draw_Char (Display, Next_X, Y, C);
+         Draw_Char (Next_X, Y, C);
          Count := Count + 1;
       end loop;
 
